@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import {OBJLoader} from 'three/examples/jsm/Addons.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
 function main() {
 
@@ -7,26 +9,100 @@ function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 
+
     // Set up the camera
     // ================================
     const fov = 75;
     const aspect = 2; // the canvas default
     const near = 0.1;
-    const far = 5;
+    const far = 100;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.z = 2;
+    camera.position.set(0, 4, 5);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.set(0, 2, 0);
+    controls.update();
 
     // Set up the scene and lights
     // ================================
     const scene = new THREE.Scene();
 
     {
-        const color = 0xFFFFFF;
-        const intensity = 3;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(-1, 2, 4);
-        scene.add(light);
+        // Hemisphere light
+        {
+            const skyColor = 0x444444;
+            const groundColor = 0x00ffaa;
+            const intensity = 1;
+            const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+            scene.add(light);
+        }
+
+        // Spotlight
+        {
+            const color = 0xffffff;
+            const intensity = 250;
+            const light = new THREE.SpotLight(color, intensity);
+            light.position.set(0, 10, 0);
+            light.target.position.set(0, 0, 0);
+            light.angle = Math.PI * 0.25;
+            light.penumbra = 0.75;
+            scene.add(light);
+            scene.add(light.target);
+
+            // const helper = new THREE.SpotLightHelper(light);
+            // scene.add(helper);
+        }
+
+        // Point light
+        {
+            const color = 0xFF8800;
+            const intensity = 40;
+            const light = new THREE.PointLight(color, intensity);
+            light.position.set(0, 2, 0);
+            scene.add(light);
+
+            // const helper = new THREE.PointLightHelper(light);
+            // scene.add(helper);
+        }
     }
+
+    // Set up loaders
+    // ================================
+    const loadManager = new THREE.LoadingManager();
+    const loader = new THREE.TextureLoader(loadManager);
+
+    const loadingElem = document.querySelector('#loading');
+    const progressBarElem = loadingElem.querySelector('.progressbar');
+
+    loadManager.onLoad = () => {
+        loadingElem.style.display = 'none';
+
+        start();
+    }
+
+    loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
+        const progress = itemsLoaded / itemsTotal;
+        progressBarElem.style.transform = `scaleX(${progress})`;
+    };
+
+    // Set up the ground plane
+    // ================================
+    const planeSize = 40;
+ 
+    const planeTex = loader.load('resources/images/checker.png');
+    planeTex.wrapS = THREE.RepeatWrapping;
+    planeTex.wrapT = THREE.RepeatWrapping;
+    planeTex.magFilter = THREE.NearestFilter;
+    planeTex.colorSpace = THREE.SRGBColorSpace;
+    const repeats = planeSize / 2;
+    planeTex.repeat.set(repeats, repeats);
+
+    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
+    const planeMat = new THREE.MeshStandardMaterial({
+        color: 0x22ffcc,
+        map: planeTex,
+        side: THREE.DoubleSide,
+    });
 
     // Set up the box prefab
     // ================================
@@ -36,35 +112,26 @@ function main() {
     const boxDepth = 1;
     const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-    // Set up asset loading
+    // Define box material array
     // ================================
-    const loadManager = new THREE.LoadingManager();
-    const loader = new THREE.TextureLoader(loadManager);
-    
-    const loadingElem = document.querySelector('#loading');
-    const progressBarElem = loadingElem.querySelector('.progressbar');
-
-    loadManager.onLoad = () => {
-        loadingElem.style.display = 'none';
-
-        makeInstance(geometry, -2);
-        makeInstance(geometry, 0);
-        makeInstance(geometry, 2);
-    }
-
-    loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
-        const progress = itemsLoaded / itemsTotal;
-        progressBarElem.style.transform = `scaleX(${progress})`;
-    };
-
     const materials = [
-        new THREE.MeshBasicMaterial({map: loadColorTexture('resources/images/flower-1.jpg')}),
-        new THREE.MeshBasicMaterial({map: loadColorTexture('resources/images/flower-2.jpg')}),
-        new THREE.MeshBasicMaterial({map: loadColorTexture('resources/images/flower-3.jpg')}),
-        new THREE.MeshBasicMaterial({map: loadColorTexture('resources/images/flower-4.jpg')}),
-        new THREE.MeshBasicMaterial({map: loadColorTexture('resources/images/flower-5.jpg')}),
-        new THREE.MeshBasicMaterial({map: loadColorTexture('resources/images/flower-6.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-1.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-2.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-3.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-4.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-5.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-6.jpg')}),
     ];
+
+    function start() {
+        const plane = new THREE.Mesh(planeGeo, planeMat);
+        plane.rotation.x = Math.PI * -.5;
+        scene.add(plane);
+
+        makeInstance(geometry, [-2, 2, 0]);
+        makeInstance(geometry, [0, 2, 0]);
+        makeInstance(geometry, [2, 2, 0]);
+    }
 
     function render(time) {
 
@@ -90,13 +157,13 @@ function main() {
 
     }
 
-    function makeInstance(geometry, x) {
+    function makeInstance(geometry, [x, y, z]) {
 
         const cube = new THREE.Mesh(geometry, materials);
         scene.add(cube);
         cubes.push(cube);
 
-        cube.position.x = x;
+        cube.position.set(x, y, z);
 
         return cube;
 
