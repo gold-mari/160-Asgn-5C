@@ -76,7 +76,6 @@ function main() {
 
     loadManager.onLoad = () => {
         loadingElem.style.display = 'none';
-
         start();
     }
 
@@ -103,6 +102,17 @@ function main() {
         map: planeTex,
         side: THREE.DoubleSide,
     });
+
+    // Set up the skybox
+    // ================================
+
+    {
+        const texture = loader.load("resources/images/sky.png", () => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            texture.colorSpace = THREE.SRGBColorSpace;
+            scene.background = texture;
+        });
+    }
 
     // Set up the box prefab
     // ================================
