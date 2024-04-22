@@ -5,7 +5,21 @@
     <title>ThreeJS with Vite</title>
 </head>
 <body>
-    <canvas id="c"></canvas>
+    <div id="canvas-container">
+        <canvas id="c">Please use the browser supporting "canvas".</canvas>
+    </div>
     <script type="module" src="./main.js"></script>
 </body>
 </html>
+
+<style>
+    #canvas-container {
+       text-align:center;
+       margin: 10%;
+    }
+
+    canvas {
+        width: 800px;
+        height: 450px
+    }
+</style>
