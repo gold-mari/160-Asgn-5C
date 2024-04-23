@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {OBJLoader} from 'three/examples/jsm/Addons.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {MTLLoader} from 'three/addons/loaders/MTLLoader.js';
 
 function main() {
 
@@ -37,7 +38,7 @@ function main() {
             scene.add(light);
         }
 
-        // Spotlight
+        // Spotlight down
         {
             const color = 0xffffff;
             const intensity = 250;
@@ -53,12 +54,28 @@ function main() {
             // scene.add(helper);
         }
 
+        // Spotlight fumo
+        {
+            const color = 0xffffff;
+            const intensity = 250;
+            const light = new THREE.SpotLight(color, intensity);
+            light.position.set(2, 3, 5);
+            light.target.position.set(0, 2, 0);
+            light.angle = Math.PI * 0.05;
+            light.penumbra = .25;
+            scene.add(light);
+            scene.add(light.target);
+
+            // const helper = new THREE.SpotLightHelper(light);
+            // scene.add(helper);
+        }
+
         // Point light
         {
             const color = 0xFF8800;
-            const intensity = 40;
+            const intensity = 400;
             const light = new THREE.PointLight(color, intensity);
-            light.position.set(0, 2, 0);
+            light.position.set(1, 5, -2);
             scene.add(light);
 
             // const helper = new THREE.PointLightHelper(light);
@@ -133,13 +150,27 @@ function main() {
         new THREE.MeshStandardMaterial({map: loadColorTexture('resources/images/flower-6.jpg')}),
     ];
 
+    // Set up the fumo !
+    {
+        const mtlLoader = new MTLLoader();
+        const objLoader = new OBJLoader();
+
+        mtlLoader.load("resources/models/fumo/fumo.mtl", (mtl) => {
+            mtl.preload();
+            objLoader.setMaterials(mtl);
+            objLoader.load("resources/models/fumo/fumo.obj", (root) => {
+                scene.add(root);
+            });
+        });
+    }
+
     function start() {
         const plane = new THREE.Mesh(planeGeo, planeMat);
         plane.rotation.x = Math.PI * -.5;
         scene.add(plane);
 
         makeInstance(geometry, [-2, 2, 0]);
-        makeInstance(geometry, [0, 2, 0]);
+        // makeInstance(geometry, [0, 2, 0]);
         makeInstance(geometry, [2, 2, 0]);
     }
 
