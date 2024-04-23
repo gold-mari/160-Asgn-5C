@@ -154,6 +154,7 @@ function main() {
     ];
 
     // Set up the fumo !
+    let fumo;
     {
         const mtlLoader = new MTLLoader();
         const objLoader = new OBJLoader();
@@ -161,8 +162,9 @@ function main() {
         mtlLoader.load("resources/models/fumo/fumo.mtl", (mtl) => {
             mtl.preload();
             objLoader.setMaterials(mtl);
-            objLoader.load("resources/models/fumo/fumo.obj", (fumo) => {
-                scene.add(fumo);
+            objLoader.load("resources/models/fumo/fumo.obj", (obj) => {
+                scene.add(obj);
+                fumo = obj;
             });
         });
     }
@@ -194,6 +196,14 @@ function main() {
             cube.rotation.x = rot;
             cube.rotation.y = rot;
         });
+
+        {
+            const speed = 5;
+            const rot = time * speed;
+            if (fumo != undefined) {
+                fumo.rotation.y = rot;
+            }
+        }
 
         renderer.render(scene, camera);
 
