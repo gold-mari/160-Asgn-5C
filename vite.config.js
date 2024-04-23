@@ -1,5 +1,5 @@
 // vite.config.js
 export default {
     // config options
-    base: "./"
+    base: "/160-Asgn-5.1/"
 };
