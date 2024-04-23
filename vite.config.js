@@ -1,5 +1,8 @@
-// vite.config.js
-export default {
-    // config options
-    base: "/160-Asgn-5.1/"
-};
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  base: './',
+  plugins: [react()],
+})
