@@ -105,7 +105,7 @@ function main() {
     // ================================
     const planeSize = 40;
  
-    const planeTex = loader.load('./resources/images/checker.png');
+    const planeTex = loader.load('../resources/images/checker.png');
     planeTex.wrapS = THREE.RepeatWrapping;
     planeTex.wrapT = THREE.RepeatWrapping;
     planeTex.magFilter = THREE.NearestFilter;
@@ -124,7 +124,7 @@ function main() {
     // ================================
 
     {
-        const texture = loader.load("./resources/images/sky.png", () => {
+        const texture = loader.load("../resources/images/sky.png", () => {
             texture.mapping = THREE.EquirectangularReflectionMapping;
             texture.colorSpace = THREE.SRGBColorSpace;
             scene.background = texture;
@@ -142,12 +142,12 @@ function main() {
     // Define box material array
     // ================================
     const materials = [
-        new THREE.MeshStandardMaterial({map: loadColorTexture('./resources/images/flower-1.jpg')}),
-        new THREE.MeshStandardMaterial({map: loadColorTexture('./resources/images/flower-2.jpg')}),
-        new THREE.MeshStandardMaterial({map: loadColorTexture('./resources/images/flower-3.jpg')}),
-        new THREE.MeshStandardMaterial({map: loadColorTexture('./resources/images/flower-4.jpg')}),
-        new THREE.MeshStandardMaterial({map: loadColorTexture('./resources/images/flower-5.jpg')}),
-        new THREE.MeshStandardMaterial({map: loadColorTexture('./resources/images/flower-6.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('../resources/images/flower-1.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('../resources/images/flower-2.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('../resources/images/flower-3.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('../resources/images/flower-4.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('../resources/images/flower-5.jpg')}),
+        new THREE.MeshStandardMaterial({map: loadColorTexture('../resources/images/flower-6.jpg')}),
     ];
 
     // Set up the fumo !
@@ -155,10 +155,10 @@ function main() {
         const mtlLoader = new MTLLoader();
         const objLoader = new OBJLoader();
 
-        mtlLoader.load("./resources/models/fumo/fumo.mtl", (mtl) => {
+        mtlLoader.load("../resources/models/fumo/fumo.mtl", (mtl) => {
             mtl.preload();
             objLoader.setMaterials(mtl);
-            objLoader.load("./resources/models/fumo/fumo.obj", (root) => {
+            objLoader.load("../resources/models/fumo/fumo.obj", (root) => {
                 scene.add(root);
             });
         });
