@@ -5,7 +5,7 @@
     <title>ThreeJS with Vite</title>
 </head>
 <body>
-    <div id="canvas-container">
+    <div class="canvas-container">
         <canvas id="c">Please use the browser supporting "canvas".</canvas>
     </div>
 
@@ -18,14 +18,24 @@
 </html>
 
 <style>
-    #canvas-container {
-       text-align:center;
-       margin: 9%;
+    body {
+        background-color: #7cd9b6;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        line-height: 100%;
+        font-size: auto;
     }
 
     canvas {
+        padding: 0;
+        margin: auto;
+        display: block;
         width: 800px;
         height: 450px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
     }
 
     #loading {
@@ -41,7 +51,7 @@
 
     #loading .progress {
         margin: 1.5em;
-        border: 1px solid white;
+        /* border: 1px solid white; */
         width: 50vw;
     }
     

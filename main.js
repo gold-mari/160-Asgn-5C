@@ -161,8 +161,8 @@ function main() {
         mtlLoader.load("resources/models/fumo/fumo.mtl", (mtl) => {
             mtl.preload();
             objLoader.setMaterials(mtl);
-            objLoader.load("resources/models/fumo/fumo.obj", (root) => {
-                scene.add(root);
+            objLoader.load("resources/models/fumo/fumo.obj", (fumo) => {
+                scene.add(fumo);
             });
         });
     }
