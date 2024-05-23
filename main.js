@@ -3,7 +3,7 @@ import {OBJLoader} from 'three/examples/jsm/Addons.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {MTLLoader} from 'three/addons/loaders/MTLLoader.js';
 
-// const resourcesPath = "https://gold-mari.github.io/160-Asgn-1/";
+// const resourcesPath = "https://gold-mari.github.io/160-Asgn-5B/";
 const resourcesPath = "";
 
 function main() {
