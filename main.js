@@ -21,10 +21,10 @@ function main() {
     const near = 0.1;
     const far = 100;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 4, 5);
+    camera.position.set(0, 9, 10);
 
     const controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 2, 0);
+    controls.target.set(0, 7, 0);
     controls.update();
 
     // Set up the scene and lights
@@ -46,8 +46,8 @@ function main() {
             const color = 0xffffff;
             const intensity = 250;
             const light = new THREE.SpotLight(color, intensity);
-            light.position.set(0, 10, 0);
-            light.target.position.set(0, 0, 0);
+            light.position.set(0, 15, 0);
+            light.target.position.set(0, 5, 0);
             light.angle = Math.PI * 0.25;
             light.penumbra = 0.75;
             scene.add(light);
@@ -62,8 +62,8 @@ function main() {
             const color = 0xffffff;
             const intensity = 250;
             const light = new THREE.SpotLight(color, intensity);
-            light.position.set(2, 3, 5);
-            light.target.position.set(0, 2, 0);
+            light.position.set(2, 8, 5);
+            light.target.position.set(0, 7, 0);
             light.angle = Math.PI * 0.05;
             light.penumbra = .25;
             scene.add(light);
@@ -78,7 +78,7 @@ function main() {
             const color = 0xFF8800;
             const intensity = 400;
             const light = new THREE.PointLight(color, intensity);
-            light.position.set(1, 5, -2);
+            light.position.set(1, 10, -2);
             scene.add(light);
 
             // const helper = new THREE.PointLightHelper(light);
@@ -113,8 +113,7 @@ function main() {
     planeTex.wrapT = THREE.RepeatWrapping;
     planeTex.magFilter = THREE.NearestFilter;
     planeTex.colorSpace = THREE.SRGBColorSpace;
-    const repeats = planeSize / 2;
-    planeTex.repeat.set(repeats, repeats);
+    planeTex.repeat.set(planeSize/2, planeSize/2);
 
     const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
     const planeMat = new THREE.MeshStandardMaterial({
@@ -122,6 +121,10 @@ function main() {
         map: planeTex,
         side: THREE.DoubleSide,
     });
+
+    const pillarMat = new THREE.MeshStandardMaterial().copy(planeMat);
+    pillarMat.map = planeTex.clone();
+    pillarMat.map.repeat.set(planeSize/20, planeSize/2);
 
     // Set up the skybox
     // ================================
@@ -140,11 +143,11 @@ function main() {
     const boxWidth = 1;
     const boxHeight = 1;
     const boxDepth = 1;
-    const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+    const box = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
     // Define box material array
     // ================================
-    const materials = [
+    const flowerMat = [
         new THREE.MeshStandardMaterial({map: loadColorTexture("resources/images/flower-1.jpg")}),
         new THREE.MeshStandardMaterial({map: loadColorTexture("resources/images/flower-2.jpg")}),
         new THREE.MeshStandardMaterial({map: loadColorTexture("resources/images/flower-3.jpg")}),
@@ -165,6 +168,7 @@ function main() {
             objLoader.load("resources/models/fumo/fumo.obj", (obj) => {
                 scene.add(obj);
                 fumo = obj;
+                fumo.position.set(0, 5, 0);
             });
         });
     }
@@ -174,9 +178,35 @@ function main() {
         plane.rotation.x = Math.PI * -.5;
         scene.add(plane);
 
-        makeInstance(geometry, [-2, 2, 0]);
-        // makeInstance(geometry, [0, 2, 0]);
-        makeInstance(geometry, [2, 2, 0]);
+        // Add steps
+        for (let i=5; i>0; i--) {
+            const stepGeo = new THREE.CylinderGeometry( 10+i, 10+i, 1, 32 );
+            makeInstance(stepGeo, pillarMat, [0, 5-i+0.5, 0]);
+        }
+
+        // Add spinning cubes
+        addSpinningGeometryAt(box, flowerMat, [-2, 7, 0]);
+        addSpinningGeometryAt(box, flowerMat, [2, 7, 0]);
+
+        // Add pillars
+        let radius = 8;
+        let height = 20
+        for (let i=0; i<13; i++) {
+            let angle = (i/13) * 2 * Math.PI;
+            let x = Math.cos(angle) * radius;
+            let z = Math.sin(angle) * radius;
+            // console.log(`angle: ${angle} | x: ${x} | z: ${z}`);
+            let pillar = makeInstance(box, pillarMat, [x, height/2+5, z]);
+            pillar.scale.set(1, height, 1);
+        }
+
+        // Add roof
+        const roofTopGeo = new THREE.CylinderGeometry( 0, 9, 4, 32 );
+        const roofBaseGeo = new THREE.CylinderGeometry( 9, 10, 4, 32 );
+        const roofRimGeo = new THREE.CylinderGeometry( 11, 11, 1, 32 );
+        makeInstance(roofBaseGeo, pillarMat, [0, 27, 0]);
+        makeInstance(roofTopGeo, pillarMat, [0, 31, 0]);
+        makeInstance(roofRimGeo, pillarMat, [0, 25, 0]);
     }
 
     function render(time) {
@@ -211,16 +241,21 @@ function main() {
 
     }
 
-    function makeInstance(geometry, [x, y, z]) {
-
-        const cube = new THREE.Mesh(geometry, materials);
-        scene.add(cube);
+    function addSpinningGeometryAt(geometry, material, [x, y, z]) {
+        const cube = makeInstance(geometry, material, [x, y, z]);
         cubes.push(cube);
+
+        return cube;
+    }
+
+    function makeInstance(geometry, material, [x, y, z]) {
+
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
 
         cube.position.set(x, y, z);
 
         return cube;
-
     }
 
     requestAnimationFrame(render);
