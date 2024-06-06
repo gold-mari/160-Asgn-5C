@@ -3,6 +3,11 @@ import {OBJLoader} from 'three/examples/jsm/Addons.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {MTLLoader} from 'three/addons/loaders/MTLLoader.js';
 
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {FilmPass} from 'three/addons/postprocessing/FilmPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+
 // const resourcesPath = "https://gold-mari.github.io/160-Asgn-5B/";
 const resourcesPath = "";
 
@@ -19,7 +24,7 @@ function main() {
     const fov = 75;
     const aspect = 2; // the canvas default
     const near = 0.1;
-    const far = 100;
+    const far = 200;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.position.set(-2, 9, 15);
 
@@ -126,6 +131,11 @@ function main() {
     pillarMat.map = planeTex.clone();
     pillarMat.map.repeat.set(planeSize/20, planeSize/2);
 
+    // Set up the ground pillar
+    // ================================
+    const groundPillarGeo = new THREE.BoxGeometry(planeSize, 400, planeSize);
+    const groundPillar = makeInstance(groundPillarGeo, planeMat, [0, -200, 0]);
+
     // Set up the skybox
     // ================================
 
@@ -173,6 +183,19 @@ function main() {
         });
     }
 
+    // Set up postprocessing
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+
+    const filmPass = new FilmPass(
+        0.5,   // intensity
+        false,  // grayscale
+    );
+    composer.addPass(filmPass);
+
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
+
     function start() {
         const plane = new THREE.Mesh(planeGeo, planeMat);
         plane.rotation.x = Math.PI * -.5;
@@ -209,33 +232,44 @@ function main() {
         makeInstance(roofRimGeo, planeMat, [0, 25, 0]);
     }
 
-    function render(time) {
+    let then = 0;
+    function render(now) {
 
-        time *= 0.001; // convert time to seconds
+        now *= 0.001; // convert time to seconds
+        const deltaTime = now-then;
+        then = now;
 
         // Dynamic updating of aspect ratio
         if (resizeRendererToDisplaySize(renderer)) {
             const canvas = renderer.domElement;
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
             camera.updateProjectionMatrix();
+            composer.setSize(canvas.width, canvas.height);
         }
 
         cubes.forEach((cube, ndx) => {
             const speed = 1 + ndx * 0.1;
-            const rot = time * speed;
+            const rot = now * speed;
             cube.rotation.x = rot;
             cube.rotation.y = rot;
         });
 
         {
             const speed = 5;
-            const rot = time * speed;
+            const rot = now * speed;
             if (fumo != undefined) {
                 fumo.rotation.y = rot;
             }
         }
 
-        renderer.render(scene, camera);
+        // Adjust post processing
+        if (fumo != undefined) {
+            let distance = camera.position.distanceTo(fumo.position);
+            
+            filmPass.uniforms.intensity.value = Math.pow(distance/10, 2);
+        }
+
+        composer.render(deltaTime);
 
         requestAnimationFrame(render);
 
