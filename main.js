@@ -8,7 +8,6 @@ import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {FilmPass} from 'three/addons/postprocessing/FilmPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 
-// const resourcesPath = "https://gold-mari.github.io/160-Asgn-5B/";
 const resourcesPath = "";
 
 function main() {
