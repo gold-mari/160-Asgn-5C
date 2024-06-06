@@ -21,7 +21,7 @@ function main() {
     const near = 0.1;
     const far = 100;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(0, 9, 10);
+    camera.position.set(-2, 9, 15);
 
     const controls = new OrbitControls(camera, canvas);
     controls.target.set(0, 7, 0);
@@ -181,7 +181,7 @@ function main() {
         // Add steps
         for (let i=5; i>0; i--) {
             const stepGeo = new THREE.CylinderGeometry( 10+i, 10+i, 1, 32 );
-            makeInstance(stepGeo, pillarMat, [0, 5-i+0.5, 0]);
+            makeInstance(stepGeo, planeMat, [0, 5-i+0.5, 0]);
         }
 
         // Add spinning cubes
@@ -204,9 +204,9 @@ function main() {
         const roofTopGeo = new THREE.CylinderGeometry( 0, 9, 4, 32 );
         const roofBaseGeo = new THREE.CylinderGeometry( 9, 10, 4, 32 );
         const roofRimGeo = new THREE.CylinderGeometry( 11, 11, 1, 32 );
-        makeInstance(roofBaseGeo, pillarMat, [0, 27, 0]);
-        makeInstance(roofTopGeo, pillarMat, [0, 31, 0]);
-        makeInstance(roofRimGeo, pillarMat, [0, 25, 0]);
+        makeInstance(roofBaseGeo, planeMat, [0, 27, 0]);
+        makeInstance(roofTopGeo, planeMat, [0, 31, 0]);
+        makeInstance(roofRimGeo, planeMat, [0, 25, 0]);
     }
 
     function render(time) {
